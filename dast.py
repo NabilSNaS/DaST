@@ -1,3 +1,4 @@
+# Import necessary libraries and modules
 from __future__ import print_function
 import argparse
 import os
@@ -28,11 +29,14 @@ import torch.utils.data.sampler as sp
 from net import Net_s, Net_m, Net_l
 from vgg import VGG
 from resnet import ResNet50, ResNet18, ResNet34
+# Enable cuDNN auto-tuner for optimized performance
 cudnn.benchmark = True
+# Excel workbook and worksheet for logging
 workbook = xlwt.Workbook(encoding = 'utf-8')
 worksheet = workbook.add_sheet('imitation_network_sig')
-nz = 128
+nz = 128 # Latent vector size
 
+# Logger to output to both console and file
 class Logger(object):
     def __init__(self, filename='default.log', stream=sys.stdout):
 	    self.terminal = stream
@@ -44,9 +48,10 @@ class Logger(object):
 
     def flush(self):
 	    pass
-
+# Redirect stdout to log file
 sys.stdout = Logger('imitation_network_model.log', sys.stdout)
 
+# Argument parsing
 parser = argparse.ArgumentParser()
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=2)
 parser.add_argument('--batchSize', type=int, default=500, help='input batch size')
@@ -64,9 +69,11 @@ parser.add_argument('--save_folder', type=str, default='saved_model', help='alph
 opt = parser.parse_args()
 print(opt)
 
+# Warn if CUDA is available but not used
 if torch.cuda.is_available() and not opt.cuda:
     print("WARNING: You have a CUDA device, so you should probably run with --cuda")
-
+	
+# Dataset and model setup based on selected dataset
 if opt.dataset == 'azure':
     testset = torchvision.datasets.MNIST(root='dataset/', train=False,
                                         download=True,
@@ -111,7 +118,8 @@ elif opt.dataset == 'mnist':
         nb_iter=200, eps_iter=0.02, clip_min=0.0, clip_max=1.0,
         targeted=False)
     nc=1
-
+	
+# Load a fixed range of test samples
 data_list = [i for i in range(6000, 8000)] # fast validation
 testloader = torch.utils.data.DataLoader(testset, batch_size=500,
                                          sampler = sp.SubsetRandomSampler(data_list), num_workers=2)
@@ -127,11 +135,14 @@ def weights_init(m):
         m.weight.data.normal_(1.0, 0.02)
         m.bias.data.fill_(0)
 
+# For sklearn model: classification and probabilities
+
 def cal_azure(model, data):
     data = data.view(data.size(0), 784).cpu().numpy()
     output = model.predict(data)
     output = torch.from_numpy(output).cuda().long()
     return output
+
 
 def cal_azure_proba(model, data):
     data = data.view(data.size(0), 784).cpu().numpy()
@@ -139,7 +150,7 @@ def cal_azure_proba(model, data):
     output = torch.from_numpy(output).cuda().float()
     return output
 
-
+# Custom loss for generator combining CE and MSE
 class Loss_max(nn.Module):
     def __init__(self):
         super(Loss_max, self).__init__()
@@ -153,13 +164,15 @@ class Loss_max(nn.Module):
         # loss = criterion(pred, truth)
         final_loss = torch.exp(loss * -1)
         return final_loss
-
+	    
+# Pre-conv block used for class-wise generator input shaping
 class pre_conv(nn.Module):
     def __init__(self, num_class):
         super(pre_conv, self).__init__()
         self.nf = 64
         if opt.G_type == 1:
             self.pre_conv = nn.Sequential(
+		# Series of deconvolutions to expand latent vector
                 nn.Conv2d(nz, self.nf * 2, 3, 1, 1, bias=False),
                 nn.BatchNorm2d(self.nf * 2),
                 nn.LeakyReLU(0.2, inplace=True),
@@ -223,11 +236,12 @@ class pre_conv(nn.Module):
     def forward(self, input):
         output = self.pre_conv(input)
         return output
-
+# Create 10 class-specific pre-conv blocks
 pre_conv_block = []
 for i in range (10):
     pre_conv_block.append(nn.DataParallel(pre_conv(10).cuda()))
 
+# Generator definition based on G_type
 class Generator(nn.Module):
     def __init__(self, num_class):
         super(Generator, self).__init__()
@@ -304,15 +318,19 @@ class Generator(nn.Module):
         output = self.main(input)
         return output
 
-
+# Chunk tensor into equal-sized parts
 def chunks(arr, m):
     n = int(math.ceil(arr.size(0) / float(m)))
     return [arr[i:i + n] for i in range(0, arr.size(0), n)]
 
+
+# Instantiate generator and apply initialization
 netG = Generator(10).cuda()
 netG.apply(weights_init)
 netG = nn.DataParallel(netG)
 
+
+# Loss and optimizer setup
 criterion = nn.CrossEntropyLoss()
 criterion_max = Loss_max()
 
@@ -325,6 +343,8 @@ optimizer_block = []
 for i in range(10):
     optimizer_block.append(optim.Adam(pre_conv_block[i].parameters(), lr=opt.lr, betas=(opt.beta1, 0.999)))
 
+
+# Initial accuracy evaluation of netD (Discriminator)
 with torch.no_grad():
     correct_netD = 0.0
     total = 0.0
@@ -367,10 +387,13 @@ for data in testloader:
     correct_ghost += (predicted == labels).sum()
 print('Attack success rate: %.2f %%' %
         (100 - 100. * correct_ghost.float() / total))
+
+# Clean memory
 del inputs, labels, adv_inputs_ghost
 torch.cuda.empty_cache()
 gc.collect()
 
+# Start of training loop
 batch_num = 1000
 best_accuracy = 0.0
 best_att = 0.0
@@ -383,8 +406,11 @@ for epoch in range(opt.niter):
         ############################
         # (1) Update D network:
         ###########################
+	 # Generate noise vector
         noise = torch.randn(opt.batchSize, nz, 1, 1, device=device).cuda()
         noise_chunk = chunks(noise, 10)
+
+	# Generate fake data for each class using pre_conv and Generator
         for i in range(len(noise_chunk)):
             tmp_data = pre_conv_block[i](noise_chunk[i])
             gene_data = netG(tmp_data)
@@ -396,11 +422,14 @@ for epoch in range(opt.niter):
             else:
                 data = torch.cat((data, gene_data), 0)
                 set_label = torch.cat((set_label, label), 0)
+
+	# Shuffle data
         index = torch.randperm(set_label.size()[0])
         data = data[index]
         set_label = set_label[index]
 
         # obtain the output label of T
+	# Get target model predictions
         with torch.no_grad():
             # outputs = original_net(data)
             if opt.dataset == 'azure':
@@ -412,6 +441,8 @@ for epoch in range(opt.niter):
                 outputs = F.softmax(outputs, dim=1)
             # _, label = torch.max(outputs.data, 1)
         # print(label)
+
+	# Train Discriminator on fake data
 
         output = netD(data.detach())
         prob = F.softmax(output, dim=1)
@@ -444,6 +475,8 @@ for epoch in range(opt.niter):
         for i in range(10):
             optimizer_block[i].step()
 
+	# Print training status
+
         if (ii % 40) == 0:
             print('[%d/%d][%d/%d] D: %.4f D_prob: %.4f G: %.4f D(G(z)): %.4f / %.4f loss_imitate: %.4f loss_diversity: %.4f'
                 % (epoch, opt.niter, ii, batch_num,
@@ -475,6 +508,8 @@ for epoch in range(opt.niter):
             correct_ghost += (predicted == labels).sum()
     print('Attack success rate: %.2f %%' %
             (100 - 100. * correct_ghost.float() / total))
+
+# Save best model based on highest ASR (attack success rate)
     if best_att < (total - correct_ghost):
         torch.save(netD.state_dict(),
                     opt.save_folder + '/netD_epoch_%d.pth' % (epoch))
