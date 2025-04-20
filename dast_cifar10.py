@@ -1,3 +1,4 @@
+# Import libraries for argument parsing, tensor operations, attacks, logging, and deep learning
 from __future__ import print_function
 import argparse
 import os
@@ -39,12 +40,15 @@ nz = 128
 target =False
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
+# Set seed for reproducibility across numpy, random, and torch
 SEED = 1000
 torch.manual_seed(SEED)
 torch.cuda.manual_seed_all(SEED)
 np.random.seed(SEED)
 random.seed(SEED)
 torch.backends.cudnn.deterministic = True
+
+# Redirect all console output to a log file (dast_cifar10.log)
 
 class Logger(object):
     def __init__(self, filename='default.log', stream=sys.stdout):
@@ -59,6 +63,8 @@ class Logger(object):
 	    pass
 
 sys.stdout = Logger('dast_cifar10.log', sys.stdout)
+
+# Parse command-line arguments for training configuration and hyperparameters
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=2)
@@ -80,11 +86,15 @@ print(opt)
 if torch.cuda.is_available() and not opt.cuda:
     print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
+# Load CIFAR-10 test dataset with basic tensor transform
+
 transforms = transforms.Compose([transforms.ToTensor()])
 
 testset = torchvision.datasets.CIFAR10(root='./data', train=False,
                                        download=True,
                                        transform=transforms)
+
+# Instantiate substitute model (netD) and target model (original_net), and load pretrained weights into the target
 
 netD = VGG('VGG13').cuda()
 
@@ -95,6 +105,7 @@ original_net.load_state_dict(torch.load(
 # original_net = nn.DataParallel(original_net)
 original_net.eval()
 
+# Define Foolbox-based adversarial attack (FGSM initially), can switch to PGD, BIM, or CW by uncommenting others.
 
 fmodel = fb.PyTorchModel(netD, bounds=(0.0,1.0))
 # BIM
@@ -139,6 +150,7 @@ class Loss_max(nn.Module):
         return
 
     def forward(self, pred, truth, proba):
+	# Loss that combines CrossEntropy with MSE on predicted probability distribution 
         criterion_1 = nn.MSELoss()
         criterion = nn.CrossEntropyLoss()
         pred_prob = F.softmax(pred, dim=1)
@@ -170,7 +182,7 @@ def get_att_results(model, target):
             acc_num += acc_sign.sum().float()
             # adv_inputs_ori = adversary.perturb(inputs, labels)
             
-#             For PGD Epsilon 0.06, BIM 1.5 and for FGSM 0.03
+           #For PGD Epsilon 0.06, BIM 1.5 and for FGSM 0.03
              # _, adv_inputs_ori, _ = attack_fb(fmodel, inputs, TargetedMisclassification(labels), epsilons=0.06)
             
             # _, adv_inputs_ori, _ = attack_fb(fmodel, inputs, TargetedMisclassification(labels), epsilons=1.5)
@@ -228,6 +240,8 @@ def get_att_results(model, target):
                 att_sign = att_sign + acc_sign
                 att_sign = torch.where(att_sign == 2, ones, zeros)
                 att_num += att_sign.sum().float()
+		    
+#  Evaluate attack success rate (ASR) and average L2 distortion under either targeted or non-targeted setting
 
     if target:
         att_result = (att_num / acc_num * 100.0)
@@ -240,6 +254,7 @@ def get_att_results(model, target):
     print('l2 distance:  %.4f ' % (total_L2_distance / acc_num))
     return att_result
 
+#  Class-conditional pre-convolution block to process noise input before feeding into Generator
 
 class pre_conv(nn.Module):
     def __init__(self, num_class):
@@ -321,6 +336,9 @@ pre_conv_block = []
 for i in range (10):
     # pre_conv_block.append(nn.DataParallel(pre_conv(10).cuda()))
     pre_conv_block.append(pre_conv(10).cuda())
+
+	    
+# Generator architecture to convert encoded noise features into fake images (used in adversarial training)
 
 class Generator(nn.Module):
     def __init__(self, num_class):
