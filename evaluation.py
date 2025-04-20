@@ -22,13 +22,17 @@ import torchvision.transforms as transforms
 import torchvision.utils as vutils
 import torch.utils.data.sampler as sp
 
+# Import model architectures
 from net import Net_s, Net_m, Net_l
+
+# Set seeds for reproducibility
 SEED = 10000
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
 np.random.seed(SEED)
 random.seed(10000)
 
+# Command-line argument parsing
 parser = argparse.ArgumentParser()
 parser.add_argument('--workers', type=int, help='number of data loading\
     workers', default=2)
@@ -44,24 +48,29 @@ parser.add_argument('--target', action='store_true', help='manual seed')
 opt = parser.parse_args()
 # print(opt)
 
+# If no seed is provided, generate a random one
 if opt.manualSeed is None:
     opt.manualSeed = random.randint(1, 10000)
 # print("Random Seed: ", opt.manualSeed)
 random.seed(opt.manualSeed)
 torch.manual_seed(opt.manualSeed)
 
+# Enable cuDNN auto-tuner
 cudnn.benchmark = True
 
 if torch.cuda.is_available() and not opt.cuda:
     print("WARNING: You have a CUDA device, so you should probably run with \
          --cuda")
 
+
+# Load MNIST test set
 testset = torchvision.datasets.MNIST(root='/data/dataset/', train=False,
                                      download=True,
                                      transform=transforms.Compose([
                                         transforms.ToTensor(),
                                      ]))
 
+# Create DataLoader using a fixed list of test indices
 data_list = [i for i in range(0, 10000)]
 testloader = torch.utils.data.DataLoader(testset, batch_size=1,
                                          sampler = sp.SubsetRandomSampler(data_list), num_workers=2)
@@ -71,10 +80,12 @@ device = torch.device("cuda:0" if opt.cuda else "cpu")
 
 # L2 = foolbox.distances.MeanAbsoluteDistance()
 
+# Function to test adversarial robustness
 def test_adver(net, tar_net, attack, target):
     net.eval()
     tar_net.eval()
     # BIM
+    # Set up the appropriate adversarial attack based on argument
     if attack == 'BIM':
         adversary = LinfBasicIterativeAttack(
             net,
@@ -118,7 +129,7 @@ def test_adver(net, tar_net, attack, target):
     # ----------------------------------
     # Obtain the accuracy of the model
     # ----------------------------------
-
+ # Evaluate accuracy on clean (non-adversarial) inputs
     with torch.no_grad():
         correct_netD = 0.0
         total = 0.0
@@ -137,7 +148,7 @@ def test_adver(net, tar_net, attack, target):
     # ----------------------------------
     # Obtain the attack success rate of the model
     # ----------------------------------
-
+ # Evaluate attack success rate and L2 distance
     correct = 0.0
     total = 0.0
     tar_net.eval()
@@ -184,13 +195,14 @@ def test_adver(net, tar_net, attack, target):
               (100.0 - 100. * correct.float() / total))
     print('l2 distance:  %.4f ' % (total_L2_distance / total))
 
-
+# Load pretrained target model (Net_m)
 target_net = Net_m().to(device)
 state_dict = torch.load(
     'pretrained/net_m.pth')
 target_net.load_state_dict(state_dict)
 target_net.eval()
 
+# Choose the attack network based on mode (white-box, black-box, or DaST)
 if opt.mode == 'black':
     attack_net = Net_l().to(device)
     state_dict = torch.load(
@@ -204,5 +216,6 @@ elif opt.mode == 'dast':
         'saved_model_2/netD_epoch_670.pth')
     attack_net = nn.DataParallel(attack_net)
     attack_net.load_state_dict(state_dict)
-
+    
+# Run adversarial evaluation
 test_adver(attack_net, target_net, opt.adv, opt.target)
