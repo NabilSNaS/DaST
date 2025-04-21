@@ -24,6 +24,7 @@ Below are the key dependencies used in the experimental setup:
 - `scipy==1.15.2`
 - `joblib==1.4.2`
 - `pillow==11.2.1`
+  
  **Note**: The original implementation of DaST, as described in the [CVPR 2020 paper](https://openaccess.thecvf.com/content_CVPR_2020/html/Zhou_DaST_Data-Free_Substitute_Training_for_Adversarial_Attacks_CVPR_2020_paper.html), was built using **PyTorch 1.0+**. 
 
 Additional packages such as `eagerpy`, `docopt`, `matplotlib-inline`, and `Jinja2` are also included and can be installed via the `requirements.txt` file.
