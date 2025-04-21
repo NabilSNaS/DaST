@@ -6,7 +6,7 @@ This repository contains an implementation of DaST: Data-Free Substitute Trainin
 
 *Link: https://openaccess.thecvf.com/content_CVPR_2020/html/Zhou_DaST_Data-Free_Substitute_Training_for_Adversarial_Attacks_CVPR_2020_paper.html*
 
-This project built on Pytorch 1.0+.
+ **Note**: The original implementation of DaST, as described in the [CVPR 2020 paper](https://openaccess.thecvf.com/content_CVPR_2020/html/Zhou_DaST_Data-Free_Substitute_Training_for_Adversarial_Attacks_CVPR_2020_paper.html), was built using **PyTorch 1.0+**. 
 
 # Usage
 
