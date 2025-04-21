@@ -111,18 +111,18 @@ python evaluation.py --mode=dast --adv=FGSM --cuda
 
 (2) The attack success rate shown during training is an estimate. For proper evaluation, run evaluation.py to evaluate the performance of trained model.
 
-(3) If adapting DaST to other datasets (like CIFAR-10),add a CIFAR-10's model as the original_net and load the dataset. Note that the generator output must be resized from [28x28] to [32x32].
+(3) If adapting DaST to other datasets (like CIFAR-10), add a CIFAR-10's model as the original_net and load the dataset. Note that the generator output must be resized from [28x28] to [32x32].
 
 (4) Key hyperparameters:
 
-- alpha: weight for label-control loss
+- alpha: Controls the weight of label-control loss in (9) of the original paper.
 
-- beta: attack type (0 = DaST-L, >0 = DaST-P)
+- beta: Determines the attack scenario. If the 'beta' is 0, the attack scenario is DaST-L, if the 'beta' is not 0 (>0), the attack scenario is DaST-P.
 
-- G_type: architecture switch for the generator
-**Note:** It is hard to say which type is better, you can try to use them in your own dataset. Because of the multi-branch architecture of the generator, the 'batchsize' is best divisible by the number of categories.
+- G_type: There are two types of generator architecture, switch by 'G_type
+**Note:** It is hard to say which type is better, can try to use them in your own dataset. Because of the multi-branch architecture of the generator, the 'batchsize' is best divisible by the number of categories.
 
-(5) Training instability has been observed on CIFAR-10 despite fixed seeds. Check logs for details; performance may vary (The first example is failed, the training is collapsed. The second example is better, the attack success rate increases to 80% after 50 epochs in DaST-P. )
+(5) Training instability has been observed on CIFAR-10 despite fixed seeds. Check logs for details. Performance may vary (The first example is failed, the training is collapsed. The second example is better, the attack success rate increases to 80% after 50 epochs in DaST-P. )
 
 
 # Citation:
