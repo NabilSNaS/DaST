@@ -131,7 +131,6 @@ If you find this work useful, please cite the original authors:
 ```
 
 # Contact:
-For questions related to this implementation: [Hafija Aktar](hafijaaktar@uri.edu).
+For questions related to this implementation: Hafija Aktar — hafijaaktar@uri.edu
 
-For original paper inquiries: [Mingyi Zhou](mingyi.zhou@monash.edu).
-
+For original paper inquiries: Mingyi Zhou — mingyi.zhou@monash.edu
