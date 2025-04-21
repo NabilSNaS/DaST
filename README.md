@@ -8,15 +8,41 @@ This repository contains an implementation of DaST: Data-Free Substitute Trainin
 
 This project built on Pytorch 1.0+.
 
-# Usage:
+# Usage
 
 **Environment:**
-Is this code, we found the performances of DaST are different on different machines, even when we set all random seeds. Here is the details of our experimental environment.
 
-`Pytorch 1.12.0`\
-`Python 3.9.12`\
-`Cuda: 11.3.1`\
-`GPU: A40`
+The performance of DaST has been found to vary across different machines, even when all random seeds are set. All required libraries are listed in the `requirements.txt` file. A virtual environment can be created from this file to ensure reproducibility and successful execution of the project.
+
+Below are the key dependencies used in the experimental setup:
+
+- `Python 3.12.9`
+- `PyTorch 2.6.0` with `CUDA 12.4`
+- `torchvision==0.21.0`
+- `foolbox==3.3.4`
+- `advertorch==0.2.3`
+- `numpy==2.2.4`
+- `scikit-learn==1.6.1`
+- `scipy==1.15.2`
+- `joblib==1.4.2`
+- `pillow==11.2.1`
+
+Additional packages such as `eagerpy`, `docopt`, `matplotlib-inline`, and `Jinja2` are also included and can be installed via the `requirements.txt` file.
+
+**Hardware used:**
+
+- `GPU: NVIDIA GeForce RTX 2080 Ti (11GB, Turing architecture)`
+- `CUDA Version: 12.4`
+- `Driver Version: 550.127.08`
+
+To install dependencies:
+
+```bash
+python -m venv env
+source env/bin/activate  # or `env\Scripts\activate` on Windows
+pip install -r requirements.txt
+
+
 
 This work can steal the attacked model without the requirement of any real data. If you want to evaluate the performance of DaST in terms of adversarial attacks, you can use the `evaluate.py` to do it.
 
