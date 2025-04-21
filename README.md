@@ -7,9 +7,8 @@ Original GitHub Repository: https://github.com/zhoumingyi/DaST
 
 *Read the full paper here: https://openaccess.thecvf.com/content_CVPR_2020/html/Zhou_DaST_Data-Free_Substitute_Training_for_Adversarial_Attacks_CVPR_2020_paper.html*
 
-# Usage
 
-**Environment:**
+# Environment & Installation
 
 The performance of DaST has been found to vary across different machines, even when all random seeds are set. All required libraries are listed in the requirements.txt file. A virtual environment can be created to ensure reproducibility:
 
@@ -18,7 +17,7 @@ python -m venv env
 source env/bin/activate  # or `env\Scripts\activate` on Windows
 pip install -r requirements.txt
 ```
-**Experimental Setup**
+# Experimental Setup
 
 - `Python 3.12.9`
 - `PyTorch 2.6.0` with `CUDA 12.4`
@@ -35,7 +34,7 @@ pip install -r requirements.txt
 
 Additional packages such as `eagerpy`, `docopt`, `matplotlib-inline`, and `Jinja2` are also included and can be installed via the `requirements.txt` file.
 
-**Hardware:**
+# Hardware
 
 - `GPU: NVIDIA GeForce RTX 2080 Ti (11GB, Turing architecture)`
 - `CUDA Version: 12.4`
@@ -44,7 +43,7 @@ Additional packages such as `eagerpy`, `docopt`, `matplotlib-inline`, and `Jinja
 
 This work can steal the attacked model without the requirement of any real data. If you want to evaluate the performance of DaST in terms of adversarial attacks, you can use the `evaluate.py` to do it.
 
-#How it works:
+# How it works
 In the DaST framework, a substitute model is trained to imitate a black-box target model without using real data. Here's the basic idea:
 1. A GAN-based generator produces synthetic samples.
 2. These samples are fed into the target model to obtain pseudo-labels.
@@ -59,9 +58,9 @@ In the DaST framework, a substitute model is trained to imitate a black-box targ
 - Substitute model: larger CNN
   
 **CIFAR-10 Dataset:**
-Target model: VGG-16
+- Target model: VGG-16
 
-Substitute models: VGG-13, ResNet-18, ResNet-50
+- Substitute models: VGG-13, ResNet-18, ResNet-50
 
 The substitute model mimics the decision boundaries of the target model using only synthetic data and black-box queries.
 
