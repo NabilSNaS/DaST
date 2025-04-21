@@ -44,14 +44,14 @@ Additional packages such as `eagerpy`, `docopt`, `matplotlib-inline`, and `Jinja
 
 This work can steal the attacked model without the requirement of any real data. If you want to evaluate the performance of DaST in terms of adversarial attacks, you can use the `evaluate.py` to do it.
 
-##How it works:##
+#How it works:
 In the DaST framework, a substitute model is trained to imitate a black-box target model without using real data. Here's the basic idea:
 1. A GAN-based generator produces synthetic samples.
 2. These samples are fed into the target model to obtain pseudo-labels.
 3. A substitute model is trained on these synthetic samples and labels.
 4. Adversarial attacks are generated on the substitute and transferred to the target.
 
-##Architecture Notes##
+#Architecture
    
 **MNIST Dataset:**
 - Target model: medium-sized CNN
@@ -66,7 +66,7 @@ Substitute models: VGG-13, ResNet-18, ResNet-50
 The substitute model mimics the decision boundaries of the target model using only synthetic data and black-box queries.
 
 
-##Experiments##
+#Experiments
 
 1. Train the Substitute Model
    
@@ -99,7 +99,7 @@ Once the substitute model is obtained, generate adversarial examples and evaluat
 python evaluation.py --mode=dast --adv=FGSM --cuda
 ```
 
-##Notes##
+#Notes
 
 (1) A downloaded copy of the Azure model is included; no need to deploy the model separately.
 
