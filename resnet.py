@@ -36,10 +36,10 @@ class BasicBlock(nn.Module):
             )
 
     def forward(self, x):
-        out = F.relu(self.bn1(self.conv1(x)))
-        out = self.bn2(self.conv2(out))
-        out += self.shortcut(x)  # Add shortcut connection
-        out = F.relu(out)
+        out = F.relu(self.bn1(self.conv1(x)))     # Apply first conv + BN + ReLU
+        out = self.bn2(self.conv2(out))           # Apply second conv + BN
+        out += self.shortcut(x)                   # Add residual (shortcut) connection
+        out = F.relu(out)                         # Final ReLU
         return out
 
 
@@ -73,11 +73,11 @@ class Bottleneck(nn.Module):
             )
 
     def forward(self, x):
-        out = F.relu(self.bn1(self.conv1(x)))
-        out = F.relu(self.bn2(self.conv2(out)))
-        out = self.bn3(self.conv3(out))
-        out += self.shortcut(x)  # Add shortcut
-        out = F.relu(out)
+        out = F.relu(self.bn1(self.conv1(x)))     # Apply 1x1 reduction conv
+        out = F.relu(self.bn2(self.conv2(out)))   # Apply 3x3 conv
+        out = self.bn3(self.conv3(out))           # Apply 1x1 expansion conv
+        out += self.shortcut(x)                   # Add residual (shortcut) connection
+        out = F.relu(out)                         # Final ReLU
         return out
 
 
@@ -114,14 +114,14 @@ class ResNet(nn.Module):
 
     # Forward pass
     def forward(self, x):
-        out = F.relu(self.bn1(self.conv1(x)))
-        out = self.layer1(out)
-        out = self.layer2(out)
-        out = self.layer3(out)
-        out = self.layer4(out)
-        out = F.avg_pool2d(out, 4)  # Global average pooling
-        out = out.view(out.size(0), -1)  # Flatten
-        out = self.linear(out)  # Fully connected output
+        out = F.relu(self.bn1(self.conv1(x)))      # Initial conv + BN + ReLU
+        out = self.layer1(out)                     # Residual block layer 1
+        out = self.layer2(out)                     # Residual block layer 2
+        out = self.layer3(out)                     # Residual block layer 3
+        out = self.layer4(out)                     # Residual block layer 4
+        out = F.avg_pool2d(out, 4)                 # Global average pooling
+        out = out.view(out.size(0), -1)            # Flatten for FC layer
+        out = self.linear(out)                     # Output layer
         return out
 
 
