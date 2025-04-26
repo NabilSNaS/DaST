@@ -121,7 +121,7 @@ python dast_cifar10_dcgan.py --batchSize=128
 ```
 After training:
 
-Update model paths (DaST Model, Baseline Model, and Target Model) in eval_resnet.py.Trained models will be saved in the saved_model and pretrained directories.
+Update model paths (DaST Model, Baseline Model, and Target Model) in eval_resnet.py. Trained models will be saved in the saved_model and pretrained directories.
 
 Then evaluate the DCGAN-trained model:
 ```
