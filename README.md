@@ -94,6 +94,7 @@ python dast.py --dataset=azure
 python resnet50_cifar10_train.py
 ```
 This will generate a path as resnet_50_cifar10.pth in the pretrained folder. This model will be used for baseline adversarial attack evaluations.
+
 3. Once the substitute model is obtained, generate adversarial examples and evaluate their performance in non-targeted attacks
 ```python
 python eval_resnet.py --mode=dast --adv=FGSM --cuda
