@@ -100,6 +100,7 @@ This will generate a path as resnet_50_cifar10.pth in the pretrained folder. Thi
 python eval_resnet.py --mode=dast --adv=FGSM --cuda
 ```
 Evaluate Pretrained ResNet-50 as the baseline model:
+
 FGSM Attack:
 ```python
 python eval_resnet.py  --mode=baseline --adv=FGSM --baseline-model=pretrained/resnet50_cifar10.pth
