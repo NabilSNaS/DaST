@@ -114,7 +114,7 @@ BIM Attack:
 python eval_resnet.py  --mode=baseline --adv=BIM --baseline-model=pretrained/resnet50_cifar10.pth
 ```
 4. Explore Improved Generative Model (DCGAN Version)
-5. 
+
 Train DaST using DCGAN for improved diversity:
 ```
 python dast_cifar10_dcgan.py --batchSize=128
