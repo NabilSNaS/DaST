@@ -92,14 +92,32 @@ python dast.py --dataset=azure
 ```
 2. To train the Pretrained ResNet-50:
 ```python
-python ResNet_50.py
+python resnet50_cifar10_train.py
 ```
 3. Generate the adversarial attacks by white-box attacks and transfer them to the attacked model.
 
 Once the substitute model is obtained, generate adversarial examples and evaluate their performance in non-targeted attacks:
 ```python
-python evaluation.py --mode=dast --adv=FGSM --cuda
+python eval_resnet.py --mode=dast --adv=FGSM --cuda
 ```
+
+If you want to evaluate the Pretrained model(ResNet-50) on CIFAR-10 dataset with FGSM attack:
+```python
+python eval_resnet.py  --mode=baseline --adv=FGSM --baseline-model=pretrained/resnet50_cifar10.pth
+```
+If you want to evaluate the Pretrained model(ResNet-50) on CIFAR-10 dataset with PGD attack:
+```python
+python eval_resnet.py  --mode=baseline --adv=PGD --baseline-model=pretrained/resnet50_cifar10.pth
+```
+f you want to evaluate the Pretrained model(ResNet-50) on CIFAR-10 dataset with BIM attack:
+```python
+python eval_resnet.py  --mode=baseline --adv=BIM --baseline-model=pretrained/resnet50_cifar10.pth
+```
+4. To explore another Generative model in the improvemnt folder:
+5. ```python
+python dast_cifar10_dcgan.py --batchSize=128
+```
+Updates the path for the Pretrained Model, 
 
 # Notes
 
