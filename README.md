@@ -67,13 +67,14 @@ The substitute model mimics the decision boundaries of the target model using on
 
 # Experiments
 
-1. Train the Substitute Model on CIFAR-10)
+1. Train the Target Model (VGG16 on CIFAR-10)
 ```python
 python train_vgg_cifar10.py
 ```
-This will generate vgg_vgg16_best.pth, which is required as the target model for DaST. Note: This script was newly developed as it was not included in the original repository.
+This generates vgg_vgg16_best.pth, which simulates the black-box target model for DaST training. 
+**Note:**  This script was newly developed as it was not included in the original repository.
 
-To train DaST on CIFAR-10:
+Now, train the substitute model using DaST by querying the target model without real data:
 ```python
 python dast_cifar10.py
 ```
@@ -92,10 +93,8 @@ python dast.py --dataset=azure
 ```python
 python resnet50_cifar10_train.py
 ```
-This will generate a path as resnet_50_cifar10.pth in the pretrained folder.This model will be used for baseline adversarial attack evaluations.
-3. Generate the adversarial attacks by white-box attacks and transfer them to the attacked model.
-
-Once the substitute model is obtained, generate adversarial examples and evaluate their performance in non-targeted attacks:
+This will generate a path as resnet_50_cifar10.pth in the pretrained folder. This model will be used for baseline adversarial attack evaluations.
+3. Once the substitute model is obtained, generate adversarial examples and evaluate their performance in non-targeted attacks
 ```python
 python eval_resnet.py --mode=dast --adv=FGSM --cuda
 ```
@@ -117,11 +116,9 @@ Train DaST using DCGAN for improved diversity:
 ```
 python dast_cifar10_dcgan.py --batchSize=128
 ```
-fter training:
+After training:
 
-Update model paths (DaST Model, Baseline Model, and Target Model) in eval_resnet.py.
-
-Trained models will be saved in the saved_model and pretrained directories.
+Update model paths (DaST Model, Baseline Model, and Target Model) in eval_resnet.py.Trained models will be saved in the saved_model and pretrained directories.
 
 Then evaluate the DCGAN-trained model:
 ```
