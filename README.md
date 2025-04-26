@@ -67,13 +67,11 @@ The substitute model mimics the decision boundaries of the target model using on
 
 # Experiments
 
-1. Train the Substitute Model
-   
-To train the substitute model on CIFAR-10, run:
+1. Train the Substitute Model on CIFAR-10)
 ```python
 python train_vgg_cifar10.py
 ```
-This script generates vgg_vgg16_best.pth which is needed in dast_cifar10.py as the target model. This training file was not included in the original repository and has been developed to enable reproducible execution.
+This will generate vgg_vgg16_best.pth, which is required as the target model for DaST. Note: This script was newly developed as it was not included in the original repository.
 
 To train DaST on CIFAR-10:
 ```python
@@ -90,34 +88,45 @@ If you want to train a subsitute model in Azure:
 ```python
 python dast.py --dataset=azure
 ```
-2. To train the Pretrained ResNet-50:
+2. Train to get the the Pretrained ResNet-50 Model on CIFAR-10:
 ```python
 python resnet50_cifar10_train.py
 ```
+This will generate a path as resnet_50_cifar10.pth in the pretrained folder.This model will be used for baseline adversarial attack evaluations.
 3. Generate the adversarial attacks by white-box attacks and transfer them to the attacked model.
 
 Once the substitute model is obtained, generate adversarial examples and evaluate their performance in non-targeted attacks:
 ```python
 python eval_resnet.py --mode=dast --adv=FGSM --cuda
 ```
-
-If you want to evaluate the Pretrained model(ResNet-50) on CIFAR-10 dataset with FGSM attack:
+Evaluate Pretrained ResNet-50 with Baseline Attacks
+FGSM Attack:
 ```python
 python eval_resnet.py  --mode=baseline --adv=FGSM --baseline-model=pretrained/resnet50_cifar10.pth
 ```
-If you want to evaluate the Pretrained model(ResNet-50) on CIFAR-10 dataset with PGD attack:
+PGD Attack:
 ```python
 python eval_resnet.py  --mode=baseline --adv=PGD --baseline-model=pretrained/resnet50_cifar10.pth
 ```
-f you want to evaluate the Pretrained model(ResNet-50) on CIFAR-10 dataset with BIM attack:
+BIM Attack:
 ```python
 python eval_resnet.py  --mode=baseline --adv=BIM --baseline-model=pretrained/resnet50_cifar10.pth
 ```
-4. To explore another Generative model in the improvemnt folder:
-5. ```python
+4. Explore Improved Generative Models (DCGAN Version)
+Train DaST using DCGAN for improved diversity:
+```
 python dast_cifar10_dcgan.py --batchSize=128
 ```
-Updates the path for the Pretrained Model, 
+fter training:
+
+Update model paths (DaST Model, Baseline Model, and Target Model) in eval_resnet.py.
+
+Trained models will be saved in the saved_model and pretrained directories.
+
+Then evaluate the DCGAN-trained model:
+```
+python eval_resnet.py  --mode=baseline --adv=PGD --baseline-model=pretrained/resnet50_cifar10.pth
+```
 
 # Notes
 
